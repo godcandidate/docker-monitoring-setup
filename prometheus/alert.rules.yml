@@ -1,0 +1,22 @@
+groups:
+  - name: AppAlertGroup
+    rules:
+      # Alert for High CPU Usage
+      - alert: HighCPU
+        expr: sum(rate(container_cpu_usage_seconds_total{name="obs-sim-app",cpu="total"}[5m]) * 100) by (name, instance, job) > 0.6
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High CPU usage detected in container {{ $labels.name }}"
+          description: "Container {{ $labels.name }} is using more than 60% of CPU on the server."
+
+      # Alert for High Memory Usage
+      - alert: HighMemory
+        expr: sum((container_memory_usage_bytes{name="obs-sim-app"} / container_spec_memory_limit_bytes{name="obs-sim-app"}) * 100) by (name, instance, job) > 50
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High memory usage detected in container {{ $labels.name }}"
+          description: "Container {{ $labels.name }} is using more than 50% of its allocated memory on instance {{ $labels.instance }}."
