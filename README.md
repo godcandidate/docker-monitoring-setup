@@ -17,9 +17,15 @@ This project uses the following components to monitor and alert system performan
 <p align="center"> <img src="./assets/monitoring-arch.png" alt="Architecture Diagram" width="800"> </p>
 
 
+## Folder structure
+├── docker-compose.yml           # Defines and runs all containers
+├── prometheus                   # Prometheus configurations
+│   ├── alertmanager.yml         # Alertmanager routing and notification settings
+│   ├── alert.rules.yml          # Custom alerting rules (e.g., high CPU/memory)
+│   └── prometheus.yml           # Prometheus scrape configuration and jobs
+
+
 ## Components
-
-
 The project consists of several containerized services:
 
 1. **obs-sim-app**: Main application container
@@ -48,6 +54,9 @@ The project consists of several containerized services:
    - Port: 3000
    - Default admin password: admin
    - Persistent storage for dashboards and configurations
+
+
+
 
 ## Alert Configuration
 
