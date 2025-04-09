@@ -1,118 +1,115 @@
 # **Monitoring Setup with Prometheus, Grafana, and Alertmanager**
 
-This repository contains a Docker Compose-based setup for monitoring containers using **Prometheus**, **Grafana**, **Alertmanager**, and **Node Exporter**. It is designed to be simple, modular, and easy to extend for small to medium-sized projects.
+A containerized application for testing and validating prometheus. This project provides a simulation environment with monitoring, alerting, and visualization capabilities.
+
+## **Overview**
+
+This project uses the following components to monitor and alert system performance:
+
+- **Docker Compose**: Manages and runs all containers.
+- **cAdvisor**: Collects container resource usage data (CPU, memory, etc.).
+- **Prometheus**: Gathers and stores metrics from services and triggers alerts.
+- **Grafana**: Displays metrics through real-time dashboards.
+- **Alertmanager**: Sends alerts when issues are detected (like high CPU usage).
+- **Slack**: Receives notifications about system issues.
 
 ---
+<p align="center"> <img src="./assets/monitoring-arch.png" alt="Architecture Diagram" width="800"> </p>
 
-## **Features**
-- **Prometheus**: Scrapes metrics from exporters and monitored containers.
-- **Node Exporter**: Collects system-level metrics (CPU, memory, disk, etc.).
-- **Alertmanager**: Handles alerts and sends notifications (e.g., via email or Slack).
-- **Grafana**: Visualizes metrics with pre-configured dashboards.
-- **Docker Compose**: Simplifies deployment and management of all components.
 
----
+## Components
 
-## **Prerequisites**
-Before getting started, ensure you have the following installed:
-- **Docker**: [Install Docker](https://docs.docker.com/get-docker/)
-- **Docker Compose**: Included with Docker Desktop or install separately.
 
----
+The project consists of several containerized services:
 
-## **Quick Start**
+1. **obs-sim-app**: Main application container
+   - Port: 5000
+   - Resource limits: 
+     - CPU: 0.5 cores
+     - Memory: 500MB
+     - No swap memory
 
-### 1. Clone the Repository
-```bash
-git clone https://github.com/<your-username>/<your-repo-name>.git
-cd <your-repo-name>
-```
+2. **Prometheus**: Metrics collection and storage
+   - Port: 9090
+   - Configured with custom alert rules
+   - Scrapes metrics from all services
 
-### 2. Start the Monitoring Stack
-Run the following command to start all services:
+3. **Alertmanager**: Alert handling and notifications
+   - Port: 9093
+   - Integrated with Slack for notifications
+   - Configurable alert routing
+
+4. **cAdvisor**: Container metrics collector
+   - Port: 8081
+   - Monitors container resource usage
+   - Provides detailed container metrics
+
+5. **Grafana**: Metrics visualization
+   - Port: 3000
+   - Default admin password: admin
+   - Persistent storage for dashboards and configurations
+
+## Alert Configuration
+
+The system includes pre-configured alerts for:
+
+### High CPU Usage
+- Triggers when CPU usage exceeds 60%
+- Monitoring interval: 5 minutes
+- Alert delay: 1 minute
+- Severity: Warning
+
+### High Memory Usage
+- Triggers when memory usage exceeds 50%
+- Monitoring interval: 1 minute
+- Alert delay: 1 minute
+- Severity: Warning
+
+## Deployment
+
+### Prerequisites
+- Docker and Docker Compose
+- Slack webhook URL (for alerts)
+
+### Running the Application
+
 ```bash
 docker-compose up -d
 ```
 
-### 3. Access the Tools
-Once the stack is running, you can access the tools via your browser:
-- **Prometheus**: [http://localhost:9090](http://localhost:9090)
-- **Alertmanager**: [http://localhost:9093](http://localhost:9093)
-- **Grafana**: [http://localhost:3000](http://localhost:3000)  
-  Default credentials: `admin/admin`
+### Accessing Services
+- Main Application: http://localhost:5000
+- Prometheus: http://localhost:9090
+- Alertmanager: http://localhost:9093
+- cAdvisor: http://localhost:8081
+- Grafana: http://localhost:3000
 
----
+## Simulation Walkthrough
 
-## **Configuration**
+### Simulating application
+- Simluate application to use CPU greater than 60%
 
-### Adding Custom Containers for Monitoring
-To monitor additional containers:
-1. Ensure the container exposes metrics in a format Prometheus can scrape (e.g., `/metrics` endpoint).
-2. Add the container's metrics endpoint to `prometheus/prometheus.yml` under `scrape_configs`. For example:
-   ```yaml
-   - job_name: 'my-container'
-     static_configs:
-       - targets: ['my-container:8080']
-   ```
-3. Restart the stack:
-   ```bash
-   docker-compose down
-   docker-compose up -d
-   ```
+<p align="center"> <img src="./assets/cpu-high-usage.png" alt="Architecture Diagram" width="600"> </p>
 
-### Alerting Rules
-Customize alerting rules in `prometheus/alert.rules.yml`. For example:
-```yaml
-groups:
-  - name: example-alerts
-    rules:
-      - alert: HighMemoryUsage
-        expr: (node_memory_MemTotal_bytes - node_memory_MemFree_bytes) / node_memory_MemTotal_bytes * 100 > 80
-        for: 5m
-        labels:
-          severity: warning
-        annotations:
-          summary: "High memory usage detected"
-          description: "Memory usage on {{ $labels.instance }} is above 80%."
-```
+### Prometheus Alerts
+- Prometheus alarms are triggered
 
-### Notification Configuration
-Update `prometheus/alertmanager.yml` to configure how alerts are sent (e.g., email, Slack). Example for Slack:
-```yaml
-route:
-  receiver: 'slack-notifications'
+<p align="center"> <img src="./assets/prometheus-alerts.png" alt="Architecture Diagram" width="600"> </p>
 
-receivers:
-  - name: 'slack-notifications'
-    slack_configs:
-      - api_url: 'https://hooks.slack.com/services/your/slack/webhook/url'
-        channel: '#alerts'
-```
+### Grafana View
+- Grafana visulaizes the metrics
 
----
+<p align="center"> <img src="./assets/grafana-work.png" alt="Architecture Diagram" width="600"> </p>
 
-## **Grafana Dashboards**
-Pre-configured dashboards are automatically loaded into Grafana. You can also import additional dashboards:
-1. Go to Grafana's web interface ([http://localhost:3000](http://localhost:3000)).
-2. Navigate to **Dashboards > Manage > Import**.
-3. Use the following dashboard IDs:
-   - Node Exporter: `1860`
-   - Caddy Exporter: Search for relevant dashboards on [Grafana Dashboards](https://grafana.com/grafana/dashboards/).
+### Slack Message
+- Slack Message received for Alerts
+<p align="center"> <img src="./assets/grafana-work.png" alt="Architecture Diagram" width="600"> </p>
 
----
 
-## **Stopping the Stack**
-To stop all services, run:
-```bash
-docker-compose down
-```
+## Security Note
 
----
-
-## **Contributing**
-Feel free to contribute by opening issues or submitting pull requests. Suggestions for improvements are always welcome!
-
----
-
-## **License**
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+Remember to:
+- Change default passwords
+- Update the Slack webhook URL
+- Restrict access to monitoring endpoints
+- Review and adjust resource limits as needed
