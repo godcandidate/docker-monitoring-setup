@@ -113,7 +113,7 @@ docker-compose up -d
 
 ### Slack Message
 - Slack Message received for Alerts
-<p align="center"> <img src="./assets/grafana-work.png" alt="Architecture Diagram" width="600"> </p>
+<p align="center"> <img src="./assets/slack-message.png" alt="Architecture Diagram" width="600"> </p>
 
 
 ## Security Note
